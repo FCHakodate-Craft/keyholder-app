@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>キーホルダー名入れプレビュー</title>
+
+<style>
+body {
+  font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
+  margin: 30px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+.container {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.preview-box {
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+.control-panel {
+  min-width: 280px;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<h2>アクリルキーホルダー名入れ</h2>
+
+<div class="container">
+
+  <!-- プレビュー -->
+  <div class="preview-box">
+    <svg viewBox="0 0 70 15" width="560">
+      
+      <!-- アクリル棒 -->
+      <rect x="0.8" y="0.8"
+            width="68.4" height="13.4"
+            rx="2.2" ry="2.2"
+            fill="none"
+            stroke="#000"
+            stroke-width="0.6"/>
+
+      <!-- メイン横書き -->
+      <text id="mainText"
+            x="33" y="8"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            font-size="6"
+            fill="#000">
+        アクリルキー
+      </text>
+
+      <!-- 数字（右端・90°回転） -->
+      <g transform="rotate(-90 65.5 7.5)">
+        <text id="numText"
+              x="65.5" y="7.5"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              font-size="4"
+              fill="#000">
+          9
+        </text>
+      </g>
+
+    </svg>
+  </div>
+
+  <!-- 入力フォーム -->
+  <div class="control-panel">
+
+    <label>メイン文字</label>
+    <input id="nameInput" type="text" value="アクリルキー">
+
+    <label>数字（最大4桁）</label>
+    <input id="numInput" type="text" value="9" maxlength="4">
+
+    <label>フォント</label>
+    <select id="fontSelect">
+      <option value="sans-serif">Sans</option>
+      <option value="serif">Serif</option>
+      <option value="monospace">Monospace</option>
+    </select>
+
+    <button onclick="updatePreview()">更新</button>
+
+  </div>
+
+</div>
+
+<script>
+function updatePreview() {
+
+  const name = document.getElementById("nameInput").value;
+
+  const num = document.getElementById("numInput")
+                .value
+                .replace(/[^0-9]/g,"")
+                .slice(0,4);
+
+  const font = document.getElementById("fontSelect").value;
+
+  document.getElementById("mainText").textContent = name;
+  document.getElementById("numText").textContent = num;
+
+  document.getElementById("mainText")
+          .setAttribute("font-family", font);
+
+  document.getElementById("numText")
+          .setAttribute("font-family", font);
+}
+</script>
+
+</body>
+</html>
