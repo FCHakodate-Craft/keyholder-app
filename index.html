@@ -1,212 +1,68 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>アクリルルームキーホルダー</title>
-
-<link rel="apple-touch-icon" href="icon.png">
-  
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#000000">
-  
-<style>
-body {
-  font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
-  margin: 30px;
-}
-
-h2 { margin-bottom: 20px; }
-
-.container {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.preview-box {
-  border: 1px solid #ccc;
-  border-radius: 14px;
-  padding: 20px;
-}
-
-svg { display: block; max-width: 100%; }
-
-.control-panel { min-width: 280px; }
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-</style>
-</head>
-
-<body>
-
-<h2>アクリルルームキーホルダー
-入力フォーム</h2>
-
-<div class="container">
-
-  <!-- プレビュー -->
-  <div class="preview-box">
-    
-<svg viewBox="0 0 70 15" width="560">
-
-  <!-- 外枠 -->
-  <rect x="0.8" y="0.8"
-        width="68.4" height="13.4"
-        rx="2.2" ry="2.2"
-        fill="none"
-        stroke="#000"
-        stroke-width="0.6"/>
-
-  <!-- 穴（直径3mm） -->
-  <circle cx="3.8" cy="7.5"
-          r="1.5"
-          fill="none"
-          stroke="#000"
-          stroke-width="0.6"/>
-
-  <!-- 文字エリア可視化（確認用・後で消してOK） -->
-  <!--
-  <rect x="6.3" y="2" width="56" height="11"
-        fill="none" stroke="red" stroke-width="0.3"/>
-  -->
-
-  <!-- メイン文字 -->
-  <text id="mainText"
-        x="34"
-        y="8"
-        text-anchor="middle"
-        dominant-baseline="middle"
-        font-size="6"
-        fill="#000">
-    はこだてみらい館
-  </text>
-
-  <!-- 数字 -->
-  <g transform="rotate(-90 64 7.5)">
-    <text id="numText"
-          x="64"
-          y="7.5"
-          text-anchor="middle"
-          dominant-baseline="middle"
-          font-size="4"
-          fill="#000">
-      1015
-    </text>
-  </g>
-
-</svg>
-  </div>
-
-  <!-- 入力フォーム -->
-  <div class="control-panel">
-
-    <label>メイン文字</label>
-    <input id="nameInput" type="text" value="はこだてみらい館">
-
-    <label>数字（最大4桁）</label>
-    <input id="numInput" type="text" value="1015" maxlength="4">
-
-    <label>フォント</label>
-    <select id="fontSelect">
-      <option value="sans-serif">Sans</option>
-      <option value="serif">Serif</option>
-      <option value="monospace">Monospace</option>
-    </select>
-
-  </div>
-
-</div>
-
 <script>
-const nameInput = document.getElementById("nameInput");
-const numInput = document.getElementById("numInput");
-const fontSelect = document.getElementById("fontSelect");
-const mainText = document.getElementById("mainText");
-const numText = document.getElementById("numText");
+(() => {
+  const nameInput = document.getElementById("nameInput");
+  const numInput = document.getElementById("numInput");
+  const fontSelect = document.getElementById("fontSelect");
+  const mainText = document.getElementById("mainText");
+  const numText = document.getElementById("numText");
 
-function normalizeNumber() {
-  const clean = numInput.value.replace(/[^0-9]/g,"").slice(0,4);
-  numInput.value = clean;
-  return clean;
-}
-
-function fitMainText() {
-
-  let fontSize = 6;
-  mainText.setAttribute("font-size", fontSize);
-
-  // 数字エリアを除いた安全幅
-  const maxWidth = 56;
-
-  let bbox = mainText.getBBox();
-
-  while (bbox.width > maxWidth && fontSize > 2) {
-    fontSize -= 0.2;
-    mainText.setAttribute("font-size", fontSize);
-    bbox = mainText.getBBox();
+  function normalizeNumber() {
+    const clean = (numInput.value || "").replace(/[^0-9]/g, "").slice(0, 4);
+    numInput.value = clean;
+    return clean;
   }
-}
 
-function updatePreview() {
+  // 穴(直径3mm)と数字エリアを避けて、文字を中央配置＆自動縮小（iPad/Safari安定版）
+  function fitMainText() {
+    const holeCenter = 3.8;
+    const holeRadius = 1.5;   // 直径3mm
+    const holeMargin = 0.8;   // 穴の右の余白（狭めたいなら 0.5〜1.2 で調整）
+    const numberArea = 6;     // 右側の数字エリア幅
+    const rightMargin = 2;    // 右端余白
 
-  mainText.textContent = nameInput.value;
-  numText.textContent = normalizeNumber();
+    const holeRight = holeCenter + holeRadius;
+    const textStart = holeRight + holeMargin;
+    const textEnd = 70 - numberArea - rightMargin;
 
-  const font = fontSelect.value;
+    const maxWidth = Math.max(5, textEnd - textStart);
+    const centerX = textStart + maxWidth / 2;
 
-  mainText.setAttribute("font-family", font);
-  numText.setAttribute("font-family", font);
+    // まずXを確定してから測る（ズレ防止）
+    mainText.setAttribute("x", centerX);
 
- function fitMainText() {
+    // 初期サイズ
+    let fontSize = 6;
+    mainText.setAttribute("font-size", fontSize);
 
-  const holeRight = 3.8 + 1.5;
-  const holeMargin = 1;
-  const numberArea = 6;
-  const rightMargin = 2;
+    // 描画が落ち着いてから幅計測（Safari対策）
+    requestAnimationFrame(() => {
+      let bbox = mainText.getBBox();
 
-  const textStart = holeRight + holeMargin;
-  const textEnd = 70 - numberArea - rightMargin;
+      while (bbox.width > maxWidth && fontSize > 2) {
+        fontSize -= 0.2;
+        mainText.setAttribute("font-size", fontSize);
+        bbox = mainText.getBBox();
+      }
+    });
+  }
 
-  const maxWidth = textEnd - textStart;
-  const centerX = textStart + maxWidth / 2;
+  function updatePreview() {
+    mainText.textContent = nameInput.value || "";
+    numText.textContent = normalizeNumber();
 
-  mainText.setAttribute("x", centerX);
+    const font = fontSelect.value;
+    mainText.setAttribute("font-family", font);
+    numText.setAttribute("font-family", font);
 
-  let fontSize = 6;
-  mainText.setAttribute("font-size", fontSize);
+    fitMainText();
+  }
 
-  // 少し待ってから計測（Safari安定対策）
-  requestAnimationFrame(() => {
+  // リアルタイム反映
+  nameInput.addEventListener("input", updatePreview);
+  numInput.addEventListener("input", updatePreview);
+  fontSelect.addEventListener("change", updatePreview);
 
-    let bbox = mainText.getBBox();
-
-    while (bbox.width > maxWidth && fontSize > 2) {
-      fontSize -= 0.2;
-      mainText.setAttribute("font-size", fontSize);
-      bbox = mainText.getBBox();
-    }
-
-  });
-}
-
-// 入力と同時に更新
-nameInput.addEventListener("input", updatePreview);
-numInput.addEventListener("input", updatePreview);
-fontSelect.addEventListener("change", updatePreview);
-
-// 初期実行
-updatePreview();
+  // 初期表示
+  updatePreview();
+})();
 </script>
-
-</body>
-</html>
