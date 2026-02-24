@@ -1,3 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アクリルルームキーホルダー</title>
+
+<link rel="apple-touch-icon" href="icon.png">
+  
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#000000">
+  
+<style>
+body {
+  font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
+  margin: 30px;
+}
+
+h2 { margin-bottom: 20px; }
+
+.container {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.preview-box {
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+svg { display: block; max-width: 100%; }
+
+.control-panel { min-width: 280px; }
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<h2>アクリルルームキーホルダー
+入力フォーム</h2>
+
+<div class="container">
+
+  <!-- プレビュー -->
+  <div class="preview-box">
+    
+<svg viewBox="0 0 70 15" width="560">
+
+  <!-- 外枠 -->
+  <rect x="0.8" y="0.8"
+        width="68.4" height="13.4"
+        rx="2.2" ry="2.2"
+        fill="none"
+        stroke="#000"
+        stroke-width="0.6"/>
+
+  <!-- 穴（直径3mm） -->
+  <circle cx="3.8" cy="7.5"
+          r="1.5"
+          fill="none"
+          stroke="#000"
+          stroke-width="0.6"/>
+
+  <!-- 文字エリア可視化（確認用・後で消してOK） -->
+  <!--
+  <rect x="6.3" y="2" width="56" height="11"
+        fill="none" stroke="red" stroke-width="0.3"/>
+  -->
+
+  <!-- メイン文字 -->
+  <text id="mainText"
+        x="34"
+        y="8"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="6"
+        fill="#000">
+    はこだてみらい館
+  </text>
+
+  <!-- 数字 -->
+  <g transform="rotate(-90 64 7.5)">
+    <text id="numText"
+          x="64"
+          y="7.5"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          font-size="4"
+          fill="#000">
+      1015
+    </text>
+  </g>
+
+</svg>
+  </div>
+
+  <!-- 入力フォーム -->
+  <div class="control-panel">
+
+    <label>メイン文字</label>
+    <input id="nameInput" type="text" value="はこだてみらい館">
+
+    <label>数字（最大4桁）</label>
+    <input id="numInput" type="text" value="1015" maxlength="4">
+
+    <label>フォント</label>
+    <select id="fontSelect">
+      <option value="sans-serif">Sans</option>
+      <option value="serif">Serif</option>
+      <option value="monospace">Monospace</option>
+    </select>
+
+  </div>
+
+</div>
+
 <script>
 (() => {
   const nameInput = document.getElementById("nameInput");
@@ -66,3 +195,6 @@
   updatePreview();
 })();
 </script>
+
+</body>
+</html>
