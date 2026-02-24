@@ -68,15 +68,21 @@ input, select {
         stroke-width="0.6"/>
 
   <!-- 穴（直径3mm） -->
-  <!-- 外枠0.8 + 3mm → 中心約3.8 -->
   <circle cx="3.8" cy="7.5"
           r="1.5"
           fill="none"
           stroke="#000"
           stroke-width="0.6"/>
 
+  <!-- 文字エリア可視化（確認用・後で消してOK） -->
+  <!--
+  <rect x="6.3" y="2" width="56" height="11"
+        fill="none" stroke="red" stroke-width="0.3"/>
+  -->
+
   <!-- メイン文字 -->
   <text id="mainText"
+        x="34"
         y="8"
         text-anchor="middle"
         dominant-baseline="middle"
@@ -85,7 +91,7 @@ input, select {
     はこだてみらい館
   </text>
 
-  <!-- 数字（右側固定） -->
+  <!-- 数字 -->
   <g transform="rotate(-90 64 7.5)">
     <text id="numText"
           x="64"
@@ -161,7 +167,36 @@ function updatePreview() {
   mainText.setAttribute("font-family", font);
   numText.setAttribute("font-family", font);
 
-  fitMainText();
+ function fitMainText() {
+
+  const holeRight = 3.8 + 1.5;
+  const holeMargin = 1;
+  const numberArea = 6;
+  const rightMargin = 2;
+
+  const textStart = holeRight + holeMargin;
+  const textEnd = 70 - numberArea - rightMargin;
+
+  const maxWidth = textEnd - textStart;
+  const centerX = textStart + maxWidth / 2;
+
+  mainText.setAttribute("x", centerX);
+
+  let fontSize = 6;
+  mainText.setAttribute("font-size", fontSize);
+
+  // 少し待ってから計測（Safari安定対策）
+  requestAnimationFrame(() => {
+
+    let bbox = mainText.getBBox();
+
+    while (bbox.width > maxWidth && fontSize > 2) {
+      fontSize -= 0.2;
+      mainText.setAttribute("font-size", fontSize);
+      bbox = mainText.getBBox();
+    }
+
+  });
 }
 
 // 入力と同時に更新
