@@ -11,9 +11,7 @@ body {
   margin: 30px;
 }
 
-h2 {
-  margin-bottom: 20px;
-}
+h2 { margin-bottom: 20px; }
 
 .container {
   display: flex;
@@ -28,33 +26,17 @@ h2 {
   padding: 20px;
 }
 
-svg {
-  display: block;
-  max-width: 100%;
-}
+svg { display: block; max-width: 100%; }
 
-.control-panel {
-  min-width: 280px;
-}
+.control-panel { min-width: 280px; }
 
-input, select, button {
+input, select {
   width: 100%;
   padding: 10px;
   margin-top: 8px;
   font-size: 16px;
   border-radius: 8px;
   border: 1px solid #ccc;
-}
-
-button {
-  background: black;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  opacity: 0.8;
 }
 </style>
 </head>
@@ -69,7 +51,6 @@ button:hover {
   <div class="preview-box">
     <svg viewBox="0 0 70 15" width="560">
       
-      <!-- アクリル棒 -->
       <rect x="0.8" y="0.8"
             width="68.4" height="13.4"
             rx="2.2" ry="2.2"
@@ -77,7 +58,6 @@ button:hover {
             stroke="#000"
             stroke-width="0.6"/>
 
-      <!-- メイン横書き -->
       <text id="mainText"
             x="33" y="8"
             text-anchor="middle"
@@ -87,7 +67,6 @@ button:hover {
         アクリルキー
       </text>
 
-      <!-- 数字（右端・90°回転） -->
       <g transform="rotate(-90 65.5 7.5)">
         <text id="numText"
               x="65.5" y="7.5"
@@ -118,33 +97,60 @@ button:hover {
       <option value="monospace">Monospace</option>
     </select>
 
-    <button onclick="updatePreview()">更新</button>
-
   </div>
 
 </div>
 
 <script>
+const nameInput = document.getElementById("nameInput");
+const numInput = document.getElementById("numInput");
+const fontSelect = document.getElementById("fontSelect");
+const mainText = document.getElementById("mainText");
+const numText = document.getElementById("numText");
+
+function normalizeNumber() {
+  const clean = numInput.value.replace(/[^0-9]/g,"").slice(0,4);
+  numInput.value = clean;
+  return clean;
+}
+
+function fitMainText() {
+
+  let fontSize = 6;
+  mainText.setAttribute("font-size", fontSize);
+
+  // 数字エリアを除いた安全幅
+  const maxWidth = 56;
+
+  let bbox = mainText.getBBox();
+
+  while (bbox.width > maxWidth && fontSize > 2) {
+    fontSize -= 0.2;
+    mainText.setAttribute("font-size", fontSize);
+    bbox = mainText.getBBox();
+  }
+}
+
 function updatePreview() {
 
-  const name = document.getElementById("nameInput").value;
+  mainText.textContent = nameInput.value;
+  numText.textContent = normalizeNumber();
 
-  const num = document.getElementById("numInput")
-                .value
-                .replace(/[^0-9]/g,"")
-                .slice(0,4);
+  const font = fontSelect.value;
 
-  const font = document.getElementById("fontSelect").value;
+  mainText.setAttribute("font-family", font);
+  numText.setAttribute("font-family", font);
 
-  document.getElementById("mainText").textContent = name;
-  document.getElementById("numText").textContent = num;
-
-  document.getElementById("mainText")
-          .setAttribute("font-family", font);
-
-  document.getElementById("numText")
-          .setAttribute("font-family", font);
+  fitMainText();
 }
+
+// 入力と同時に更新
+nameInput.addEventListener("input", updatePreview);
+numInput.addEventListener("input", updatePreview);
+fontSelect.addEventListener("change", updatePreview);
+
+// 初期実行
+updatePreview();
 </script>
 
 </body>
