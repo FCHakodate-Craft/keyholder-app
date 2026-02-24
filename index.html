@@ -58,7 +58,8 @@ input, select {
   <div class="preview-box">
     
 <svg viewBox="0 0 70 15" width="560">
-  <!-- アクリル棒 -->
+
+  <!-- 外枠 -->
   <rect x="0.8" y="0.8"
         width="68.4" height="13.4"
         rx="2.2" ry="2.2"
@@ -66,16 +67,17 @@ input, select {
         stroke="#000"
         stroke-width="0.6"/>
 
-  <!-- チェーン穴（例：直径3mm、外枠から約3mmの位置） -->
-  <!-- 外枠は x=0.8 なので、中心xは 0.8 + 3.0 = 3.8 -->
-  <circle id="hole"
-          cx="3.8" cy="7.5"
+  <!-- 穴（直径3mm） -->
+  <!-- 外枠0.8 + 3mm → 中心約3.8 -->
+  <circle cx="3.8" cy="7.5"
           r="1.5"
-          fill="none" stroke="#000" stroke-width="0.6"/>
+          fill="none"
+          stroke="#000"
+          stroke-width="0.6"/>
 
-  <!-- メイン文字（穴を避けて右側に寄せた“見た目の中心”） -->
+  <!-- メイン文字 -->
   <text id="mainText"
-        x="38" y="8"
+        y="8"
         text-anchor="middle"
         dominant-baseline="middle"
         font-size="6"
@@ -83,15 +85,19 @@ input, select {
     はこだてみらい館
   </text>
 
-  <!-- 数字（右端・90°回転） -->
-  <g transform="rotate(-90 65.5 7.5)">
+  <!-- 数字（右側固定） -->
+  <g transform="rotate(-90 64 7.5)">
     <text id="numText"
-          x="65.5" y="7.5"
+          x="64"
+          y="7.5"
           text-anchor="middle"
           dominant-baseline="middle"
           font-size="4"
-          fill="#000">1015</text>
+          fill="#000">
+      1015
+    </text>
   </g>
+
 </svg>
   </div>
 
