@@ -127,6 +127,45 @@ input, select {
 
 </div>
 
+  <!-- お客さんには基本見せない：スタッフ用 -->
+<div style="margin-top:14px;">
+  <button id="openStaff"
+    style="background:#fff;border:1px solid #ccc;color:#444;border-radius:10px;padding:10px;width:100%;cursor:pointer;">
+    スタッフ用（出力・保存）
+  </button>
+
+  <details id="staffPanel" style="margin-top:10px; display:none;">
+    <summary style="cursor:pointer; user-select:none;">スタッフ操作を表示</summary>
+
+    <div style="margin-top:10px;">
+      <label>合言葉</label>
+      <input id="staffPass" type="password" placeholder="スタッフのみ" />
+      <button id="unlockStaff" style="margin-top:8px;background:#000;color:#fff;border-radius:10px;padding:10px;width:100%;border:none;cursor:pointer;">
+        開く
+      </button>
+      <div id="staffMsg" style="margin-top:8px;font-size:12px;color:#666;"></div>
+    </div>
+
+    <div id="staffControls" style="display:none; margin-top:14px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" id="btnDownload">SVGダウンロード（パス化）</button>
+        <button class="btn2" id="btnDrive">Driveへ保存（パス化）</button>
+      </div>
+
+      <div style="margin-top:12px;font-size:12px;color:#666;line-height:1.5;">
+        ※ここはスタッフ操作です（お客さまには見せない）<br>
+        ※保存先や鍵はスタッフが設定
+      </div>
+
+      <label style="margin-top:12px;display:block;">Drive保存URL（GAS）</label>
+      <input id="gasUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec" />
+
+      <label style="margin-top:10px;display:block;">保存キー（任意）</label>
+      <input id="apiKey" type="text" placeholder="任意（GAS側と一致）" />
+    </div>
+  </details>
+</div>
+
 <script>
 (() => {
   const nameInput = document.getElementById("nameInput");
@@ -194,6 +233,44 @@ input, select {
   // 初期表示
   updatePreview();
 })();
+
+// ===== スタッフ用UI（隠しパネル） =====
+const STAFF_PASSWORD = "miraikan"; // ←ここを任意に変更（例：当日共有の合言葉）
+
+const openStaffBtn = document.getElementById("openStaff");
+const staffPanel = document.getElementById("staffPanel");
+const staffPass = document.getElementById("staffPass");
+const unlockStaff = document.getElementById("unlockStaff");
+const staffControls = document.getElementById("staffControls");
+const staffMsg = document.getElementById("staffMsg");
+
+// URLに ?staff=1 があるとスタッフ入口ボタンを表示（無いと入口すら出さない）
+const isStaffHint = new URLSearchParams(location.search).get("staff") === "1";
+if (isStaffHint) {
+  staffPanel.style.display = "block";
+  openStaffBtn.style.display = "block";
+} else {
+  // お客さん用：入口自体も隠す（スタッフはURL末尾に ?staff=1 を付けて入る）
+  openStaffBtn.style.display = "none";
+  staffPanel.style.display = "none";
+}
+
+openStaffBtn?.addEventListener("click", () => {
+  staffPanel.open = true;
+});
+
+unlockStaff?.addEventListener("click", () => {
+  if ((staffPass.value || "").trim() === STAFF_PASSWORD) {
+    staffControls.style.display = "block";
+    staffMsg.textContent = "✅ スタッフ操作を表示しました";
+    staffMsg.style.color = "#0a7";
+  } else {
+    staffControls.style.display = "none";
+    staffMsg.textContent = "❌ 合言葉が違います";
+    staffMsg.style.color = "#c33";
+  }
+});
+  
 </script>
 
 </body>
