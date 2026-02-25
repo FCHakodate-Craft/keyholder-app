@@ -381,48 +381,78 @@
   }
 
   async function buildOutlinedSvg(){
-    const fontKey = fontSelect.value;
-    const font = await getPathFont(fontKey);
+  const fontKey = fontSelect.value;
+  const font = await getPathFont(fontKey);
 
-    const name = (nameInput.value || "");
-    const num  = (numInput.value || "").replace(/[^0-9]/g,"").slice(0,4);
+  const name = (nameInput.value || "");
+  const num  = (numInput.value || "").replace(/[^0-9]/g,"").slice(0,4);
 
-    // いまのプレビューで確定した値（自動縮小後）を使う
-    const mainX = parseFloat(mainText.getAttribute("x")) || 34;
-    const mainY = 8;
-    const mainSize = parseFloat(mainText.getAttribute("font-size")) || 6;
+  // ====== レイアウト条件（プレビューと同じ考え方） ======
+  const holeCenter = 3.8, holeRadius = 1.5; // 穴径3mm
+  const holeMargin = 0.8;
+  const numberArea = 6;
+  const rightMargin = 2;
 
-    // メイン文字パス
-    const pMain = font.getPath(name, 0, 0, mainSize);
-    const bMain = pMain.getBoundingBox();
-    const wMain = bMain.x2 - bMain.x1;
-    const hMain = bMain.y2 - bMain.y1;
+  const holeRight = holeCenter + holeRadius;
+  const textStart = holeRight + holeMargin;
+  const textEnd   = 70 - numberArea - rightMargin;
 
-    // 見た目中央合わせ（フォント差を吸収するため少し補正）
-    const mainTx = mainX - (bMain.x1 + wMain/2);
-    const mainTy = (mainY + mainSize*0.35) - (bMain.y1 + hMain/2);
-    const dMain = pMain.toPathData(3);
+  const mainMaxWidth = Math.max(5, textEnd - textStart);
+  const mainCenterX  = textStart + mainMaxWidth / 2;
+  const mainCenterY  = 8;        // プレビューのy=8（dominant-baseline: middle相当の中心）
+  const numCX = 64;
+  const numCY = 7.5;
 
-    // 数字（回転中心）
-    const numCX = 64;
-    const numCY = 7.5;
-    const numSize = 4;
-
-    const pNum = font.getPath(num, 0, 0, numSize);
-    const bNum = pNum.getBoundingBox();
-    const wNum = bNum.x2 - bNum.x1;
-    const hNum = bNum.y2 - bNum.y1;
-
-    const numTx = numCX - (bNum.x1 + wNum/2);
-    const numTy = (numCY + numSize*0.35) - (bNum.y1 + hNum/2);
-    const dNum = pNum.toPathData(3);
-
-    const inner = `
-  <path d="${escapeXml(dMain)}" fill="#000" transform="translate(${mainTx.toFixed(3)} ${mainTy.toFixed(3)})"/>
-  <path d="${escapeXml(dNum)}" fill="#000" transform="translate(${numTx.toFixed(3)} ${numTy.toFixed(3)}) rotate(-90 ${numCX} ${numCY})"/>`;
-
-    return makeSvgShell(inner);
+  // ====== TTF側で「収まるまで縮小」 ======
+  function fitSizeForWidth(text, startSize, minSize, maxWidth){
+    let size = startSize;
+    while (size > minSize) {
+      const p = font.getPath(text, 0, 0, size);
+      const b = p.getBoundingBox();
+      const w = b.x2 - b.x1;
+      if (w <= maxWidth) return size;
+      size -= 0.2;
+    }
+    return minSize;
   }
+
+  const mainSize = fitSizeForWidth(name, 6, 2, mainMaxWidth);
+  const numSize  = 4; // 数字は固定（必要なら同様に縮小も可能）
+
+  // ====== 文字を「中心に来るように」移動量を計算 ======
+  function centerTransformFor(text, size, cx, cy){
+    const p = font.getPath(text, 0, 0, size);
+    const b = p.getBoundingBox();
+    const w = b.x2 - b.x1;
+    const h = b.y2 - b.y1;
+    const tx = cx - (b.x1 + w/2);
+    const ty = cy - (b.y1 + h/2);
+    return { path: p, tx, ty };
+  }
+
+  const main = centerTransformFor(name, mainSize, mainCenterX, mainCenterY);
+  const dMain = main.path.toPathData(3);
+
+  // 数字（空なら出さない）
+  let numPathBlock = "";
+  if (num.length > 0) {
+    const n = centerTransformFor(num, numSize, numCX, numCY);
+    const dNum = n.path.toPathData(3);
+
+    // ★重要：transform順序
+    // SVGは右から適用なので「rotate(...) translate(...)」にすると translate が先に効く
+    numPathBlock = `
+  <path d="${escapeXml(dNum)}" fill="#000"
+        transform="rotate(-90 ${numCX} ${numCY}) translate(${n.tx.toFixed(3)} ${n.ty.toFixed(3)})"/>`;
+  }
+
+  const inner = `
+  <path d="${escapeXml(dMain)}" fill="#000"
+        transform="translate(${main.tx.toFixed(3)} ${main.ty.toFixed(3)})"/>${numPathBlock}
+  `;
+
+  return makeSvgShell(inner);
+}
 
     function postToGAS(gasUrlValue, payloadObj){
     return new Promise((resolve, reject) => {
