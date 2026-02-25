@@ -6,44 +6,26 @@
 <title>アクリルルームキーホルダー</title>
 
 <link rel="apple-touch-icon" href="icon.png">
-  
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#000000">
-  
+
 <style>
-body {
-  font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
-  margin: 30px;
-}
-
-h2 { margin-bottom: 20px; }
-
-.container {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.preview-box {
-  border: 1px solid #ccc;
-  border-radius: 14px;
-  padding: 20px;
-}
-
-svg { display: block; max-width: 100%; }
-
-.control-panel { min-width: 280px; }
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
+  body { font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif; margin: 30px; }
+  h2 { margin-bottom: 20px; white-space: pre-line; }
+  .container { display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start; }
+  .preview-box { border:1px solid #ccc; border-radius:14px; padding:20px; }
+  svg { display:block; max-width:100%; }
+  .control-panel { min-width:280px; }
+  input, select, button {
+    width:100%; padding:10px; margin-top:8px; font-size:16px;
+    border-radius:8px; border:1px solid #ccc; box-sizing:border-box;
+  }
+  .btnRow { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .btn { background:#000; color:#fff; border:none; cursor:pointer; }
+  .btn2 { background:#fff; color:#000; border:1px solid #000; cursor:pointer; }
+  .btnNext { background:#0a7; color:#fff; border:none; cursor:pointer; }
+  .hint { font-size:12px; color:#666; margin-top:10px; line-height:1.6; }
 </style>
 </head>
 
@@ -52,69 +34,38 @@ input, select {
 <h2>アクリルルームキーホルダー
 入力フォーム</h2>
 
+<label>受付番号（自動）</label>
+<input id="ticketInput" type="text" value="" readonly>
+
 <div class="container">
 
   <!-- プレビュー -->
   <div class="preview-box">
-    
-<svg viewBox="0 0 70 15" width="560">
+    <svg viewBox="0 0 70 15" width="560">
+      <rect x="0.8" y="0.8" width="68.4" height="13.4" rx="2.2" ry="2.2"
+            fill="none" stroke="#000" stroke-width="0.6"/>
+      <circle cx="3.8" cy="7.5" r="1.5"
+              fill="none" stroke="#000" stroke-width="0.6"/>
 
-  <!-- 外枠 -->
-  <rect x="0.8" y="0.8"
-        width="68.4" height="13.4"
-        rx="2.2" ry="2.2"
-        fill="none"
-        stroke="#000"
-        stroke-width="0.6"/>
+      <text id="mainText" x="34" y="8"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="6" fill="#000">はこだてみらい館</text>
 
-  <!-- 穴（直径3mm） -->
-  <circle cx="3.8" cy="7.5"
-          r="1.5"
-          fill="none"
-          stroke="#000"
-          stroke-width="0.6"/>
-
-  <!-- 文字エリア可視化（確認用・後で消してOK） -->
-  <!--
-  <rect x="6.3" y="2" width="56" height="11"
-        fill="none" stroke="red" stroke-width="0.3"/>
-  -->
-
-  <!-- メイン文字 -->
-  <text id="mainText"
-        x="34"
-        y="8"
-        text-anchor="middle"
-        dominant-baseline="middle"
-        font-size="6"
-        fill="#000">
-    はこだてみらい館
-  </text>
-
-  <!-- 数字 -->
-  <g transform="rotate(-90 64 7.5)">
-    <text id="numText"
-          x="64"
-          y="7.5"
-          text-anchor="middle"
-          dominant-baseline="middle"
-          font-size="4"
-          fill="#000">
-      1015
-    </text>
-  </g>
-
-</svg>
+      <g transform="rotate(-90 64 7.5)">
+        <text id="numText" x="64" y="7.5"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="4" fill="#000">1015</text>
+      </g>
+    </svg>
   </div>
 
   <!-- 入力フォーム -->
   <div class="control-panel">
-
     <label>メイン文字</label>
     <input id="nameInput" type="text" value="はこだてみらい館">
 
     <label>数字（最大4桁）</label>
-    <input id="numInput" type="text" value="1015" maxlength="4">
+    <input id="numInput" type="text" value="1015" maxlength="4" inputmode="numeric">
 
     <label>フォント</label>
     <select id="fontSelect">
@@ -123,89 +74,188 @@ input, select {
       <option value="monospace">Monospace</option>
     </select>
 
+    <div class="btnRow">
+      <button class="btn" id="btnDone" type="button">完了（スタッフに渡す）</button>
+      <button class="btn2" id="btnEdit" type="button" style="display:none;">修正する</button>
+    </div>
+
+    <div class="hint">
+      iPadは端末ごとに URL の末尾を変えてください：<br>
+      <code>?device=A</code> / <code>?device=B</code> / <code>?device=C</code> / <code>?device=D</code>
+    </div>
   </div>
 
 </div>
 
-  <!-- お客さんには基本見せない：スタッフ用 -->
-<div style="margin-top:14px;">
-  <button id="openStaff"
-    style="background:#fff;border:1px solid #ccc;color:#444;border-radius:10px;padding:10px;width:100%;cursor:pointer;">
-    スタッフ用（出力・保存）
-  </button>
+<!-- 完了オーバーレイ（お客さま向けメッセージ＋スタッフ扉） -->
+<div id="doneOverlay" style="
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center; z-index:9999;
+">
+  <div style="
+    width:min(560px, 92vw); background:#fff; border-radius:16px; padding:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  ">
+    <div style="font-size:18px; font-weight:700; margin-bottom:8px;">入力を確定しました</div>
+    <div style="font-size:14px; line-height:1.6; color:#333;">
+      この画面のままスタッフにお渡しください。<br>
+      スタッフがデータ出力・保存を行います。
+    </div>
 
-  <details id="staffPanel" style="margin-top:10px; display:none;">
-    <summary style="cursor:pointer; user-select:none;">スタッフ操作を表示</summary>
+    <div style="margin-top:12px; padding:12px; border:1px solid #eee; border-radius:12px; background:#fafafa;">
+      <div style="font-size:12px; color:#666;">確定内容</div>
+      <div id="doneSummary" style="font-size:16px; margin-top:6px;"></div>
+    </div>
 
-    <div style="margin-top:10px;">
-      <label>合言葉</label>
-      <input id="staffPass" type="password" placeholder="スタッフのみ" />
-      <button id="unlockStaff" style="margin-top:8px;background:#000;color:#fff;border-radius:10px;padding:10px;width:100%;border:none;cursor:pointer;">
-        開く
+    <!-- スタッフ扉 -->
+    <div style="margin-top:14px; border-top:1px dashed #ddd; padding-top:12px;">
+      <button id="openStaffInOverlay" type="button"
+        style="background:#fff;border:1px solid #ddd;color:#555;border-radius:10px;padding:10px;width:100%;cursor:pointer;">
+        スタッフ用（出力・保存）
       </button>
-      <div id="staffMsg" style="margin-top:8px;font-size:12px;color:#666;"></div>
+
+      <div id="staffGate" style="display:none; margin-top:10px;">
+        <label style="font-size:13px;">合言葉</label>
+        <input id="staffPassOverlay" type="password" placeholder="スタッフのみ"
+               style="width:100%;padding:10px;margin-top:6px;font-size:16px;border-radius:10px;border:1px solid #ccc;" />
+        <button id="unlockStaffOverlay" type="button"
+                style="margin-top:8px;background:#000;color:#fff;border-radius:10px;padding:10px;width:100%;border:none;cursor:pointer;">
+          開く
+        </button>
+        <div id="staffMsgOverlay" style="margin-top:8px;font-size:12px;color:#666;"></div>
+
+        <div id="staffControlsOverlay" style="display:none; margin-top:12px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn" id="btnDownloadOverlay" type="button">SVGダウンロード（パス化）</button>
+            <button class="btn2" id="btnDriveOverlay" type="button">Driveへ保存（パス化）</button>
+          </div>
+
+          <label style="margin-top:12px;display:block;font-size:13px;">Drive保存URL（GAS）</label>
+          <input id="gasUrlOverlay" type="text" placeholder="https://script.google.com/macros/s/.../exec"
+                 style="width:100%;padding:10px;margin-top:6px;font-size:16px;border-radius:10px;border:1px solid #ccc;" />
+
+          <label style="margin-top:10px;display:block;font-size:13px;">保存キー（任意）</label>
+          <input id="apiKeyOverlay" type="text" placeholder="任意（GAS側と一致）"
+                 style="width:100%;padding:10px;margin-top:6px;font-size:16px;border-radius:10px;border:1px solid #ccc;" />
+
+          <button id="resetCounterOverlay" type="button"
+            style="margin-top:10px;background:#fff;border:1px solid #c33;color:#c33;border-radius:10px;padding:10px;width:100%;cursor:pointer;">
+            受付番号を0にリセット（この端末のみ）
+          </button>
+          <div style="font-size:12px;color:#666;margin-top:6px;">
+            ※合言葉でスタッフ操作を開いた状態でのみ実行できます
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="staffControls" style="display:none; margin-top:14px;">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn" id="btnDownload">SVGダウンロード（パス化）</button>
-        <button class="btn2" id="btnDrive">Driveへ保存（パス化）</button>
-      </div>
-
-      <div style="margin-top:12px;font-size:12px;color:#666;line-height:1.5;">
-        ※ここはスタッフ操作です（お客さまには見せない）<br>
-        ※保存先や鍵はスタッフが設定
-      </div>
-
-      <label style="margin-top:12px;display:block;">Drive保存URL（GAS）</label>
-      <input id="gasUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec" />
-
-      <label style="margin-top:10px;display:block;">保存キー（任意）</label>
-      <input id="apiKey" type="text" placeholder="任意（GAS側と一致）" />
+    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+      <button id="closeDone" type="button"
+        style="flex:1;background:#fff;border:1px solid #ddd;color:#333;border-radius:10px;padding:10px;cursor:pointer;">
+        閉じる
+      </button>
+      <button id="backToEdit" type="button"
+        style="flex:1;background:#000;border:none;color:#fff;border-radius:10px;padding:10px;cursor:pointer;">
+        修正する
+      </button>
+      <button id="nextPerson" type="button"
+        style="flex:1;background:#0a7;border:none;color:#fff;border-radius:10px;padding:10px;cursor:pointer;">
+        次の人へ
+      </button>
     </div>
-  </details>
+  </div>
 </div>
 
 <script>
 (() => {
+  // ===== DOM =====
+  const ticketInput = document.getElementById("ticketInput");
   const nameInput = document.getElementById("nameInput");
   const numInput = document.getElementById("numInput");
   const fontSelect = document.getElementById("fontSelect");
   const mainText = document.getElementById("mainText");
   const numText = document.getElementById("numText");
 
-  function normalizeNumber() {
-    const clean = (numInput.value || "").replace(/[^0-9]/g, "").slice(0, 4);
+  const btnDone = document.getElementById("btnDone");
+  const btnEdit = document.getElementById("btnEdit");
+
+  const doneOverlay = document.getElementById("doneOverlay");
+  const doneSummary = document.getElementById("doneSummary");
+  const closeDone = document.getElementById("closeDone");
+  const backToEdit = document.getElementById("backToEdit");
+  const nextPerson = document.getElementById("nextPerson");
+
+  const openStaffInOverlay = document.getElementById("openStaffInOverlay");
+  const staffGate = document.getElementById("staffGate");
+
+  const staffPass = document.getElementById("staffPassOverlay");
+  const unlockStaff = document.getElementById("unlockStaffOverlay");
+  const staffMsg = document.getElementById("staffMsgOverlay");
+  const staffControls = document.getElementById("staffControlsOverlay");
+
+  const btnDownload = document.getElementById("btnDownloadOverlay");
+  const btnDrive = document.getElementById("btnDriveOverlay");
+  const gasUrl = document.getElementById("gasUrlOverlay");
+  const apiKey = document.getElementById("apiKeyOverlay");
+  const resetCounterBtn = document.getElementById("resetCounterOverlay");
+
+  // ===== 受付番号（端末ID + 日付タグ + 連番）=====
+  const params = new URLSearchParams(location.search);
+  const devicePrefix = (params.get("device") || "X").toUpperCase();
+
+  function getEventTag(){
+    const d = new Date();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${mm}${dd}`; // 0328
+  }
+  function pad3(n){ return String(n).padStart(3,"0"); }
+  function counterKey(){
+    return `hk_ticket_counter_v2_${getEventTag()}_${devicePrefix}`;
+  }
+  function getNextTicket(){
+    const key = counterKey();
+    const current = parseInt(localStorage.getItem(key) || "0", 10);
+    const next = current + 1;
+    localStorage.setItem(key, String(next));
+    return next;
+  }
+  function setTicket(n){
+    const value = `${getEventTag()}-${devicePrefix}-${pad3(n)}`;
+    ticketInput.value = value;
+    return value;
+  }
+
+  // 初期番号
+  setTicket(getNextTicket());
+
+  // ===== プレビュー更新 =====
+  function normalizeNumber(){
+    const clean = (numInput.value || "").replace(/[^0-9]/g,"").slice(0,4);
     numInput.value = clean;
     return clean;
   }
 
-  // 穴(直径3mm)と数字エリアを避けて、文字を中央配置＆自動縮小（iPad/Safari安定版）
-  function fitMainText() {
-    const holeCenter = 3.8;
-    const holeRadius = 1.5;   // 直径3mm
-    const holeMargin = 0.8;   // 穴の右の余白（狭めたいなら 0.5〜1.2 で調整）
-    const numberArea = 6;     // 右側の数字エリア幅
-    const rightMargin = 2;    // 右端余白
+  function fitMainText(){
+    const holeCenter = 3.8, holeRadius = 1.5;
+    const holeMargin = 0.8;
+    const numberArea = 6;
+    const rightMargin = 2;
 
     const holeRight = holeCenter + holeRadius;
     const textStart = holeRight + holeMargin;
     const textEnd = 70 - numberArea - rightMargin;
 
     const maxWidth = Math.max(5, textEnd - textStart);
-    const centerX = textStart + maxWidth / 2;
+    const centerX = textStart + maxWidth/2;
 
-    // まずXを確定してから測る（ズレ防止）
     mainText.setAttribute("x", centerX);
 
-    // 初期サイズ
     let fontSize = 6;
     mainText.setAttribute("font-size", fontSize);
 
-    // 描画が落ち着いてから幅計測（Safari対策）
     requestAnimationFrame(() => {
       let bbox = mainText.getBBox();
-
       while (bbox.width > maxWidth && fontSize > 2) {
         fontSize -= 0.2;
         mainText.setAttribute("font-size", fontSize);
@@ -214,63 +264,106 @@ input, select {
     });
   }
 
-  function updatePreview() {
+  function updatePreview(){
     mainText.textContent = nameInput.value || "";
     numText.textContent = normalizeNumber();
-
-    const font = fontSelect.value;
-    mainText.setAttribute("font-family", font);
-    numText.setAttribute("font-family", font);
-
+    const f = fontSelect.value;
+    mainText.setAttribute("font-family", f);
+    numText.setAttribute("font-family", f);
     fitMainText();
   }
 
-  // リアルタイム反映
   nameInput.addEventListener("input", updatePreview);
   numInput.addEventListener("input", updatePreview);
   fontSelect.addEventListener("change", updatePreview);
-
-  // 初期表示
   updatePreview();
-})();
 
-// ===== スタッフ用UI（隠しパネル） =====
-const STAFF_PASSWORD = "miraikan"; // ←ここを任意に変更（例：当日共有の合言葉）
-
-const openStaffBtn = document.getElementById("openStaff");
-const staffPanel = document.getElementById("staffPanel");
-const staffPass = document.getElementById("staffPass");
-const unlockStaff = document.getElementById("unlockStaff");
-const staffControls = document.getElementById("staffControls");
-const staffMsg = document.getElementById("staffMsg");
-
-// URLに ?staff=1 があるとスタッフ入口ボタンを表示（無いと入口すら出さない）
-const isStaffHint = new URLSearchParams(location.search).get("staff") === "1";
-if (isStaffHint) {
-  staffPanel.style.display = "block";
-  openStaffBtn.style.display = "block";
-} else {
-  // お客さん用：入口自体も隠す（スタッフはURL末尾に ?staff=1 を付けて入る）
-  openStaffBtn.style.display = "none";
-  staffPanel.style.display = "none";
-}
-
-openStaffBtn?.addEventListener("click", () => {
-  staffPanel.open = true;
-});
-
-unlockStaff?.addEventListener("click", () => {
-  if ((staffPass.value || "").trim() === STAFF_PASSWORD) {
-    staffControls.style.display = "block";
-    staffMsg.textContent = "✅ スタッフ操作を表示しました";
-    staffMsg.style.color = "#0a7";
-  } else {
-    staffControls.style.display = "none";
-    staffMsg.textContent = "❌ 合言葉が違います";
-    staffMsg.style.color = "#c33";
+  // ===== 完了フロー =====
+  function setLocked(locked){
+    nameInput.readOnly = locked;
+    numInput.readOnly = locked;
+    fontSelect.disabled = locked;
+    btnDone.style.display = locked ? "none" : "block";
+    btnEdit.style.display = locked ? "block" : "none";
   }
-});
-  
+
+  function makeSummary(){
+    const name = (nameInput.value || "").trim() || "（未入力）";
+    const num = (numInput.value || "").trim() || "（なし）";
+    const fontLabel = fontSelect.options[fontSelect.selectedIndex]?.textContent || "";
+    const ticket = ticketInput.value || "";
+    return `受付番号：${ticket}<br>文字：${name}<br>数字：${num}<br>フォント：${fontLabel}`;
+  }
+
+  btnDone.addEventListener("click", () => {
+    updatePreview();
+    setLocked(true);
+    doneSummary.innerHTML = makeSummary();
+    doneOverlay.style.display = "flex";
+  });
+
+  btnEdit.addEventListener("click", () => setLocked(false));
+
+  closeDone.addEventListener("click", () => { doneOverlay.style.display = "none"; });
+
+  backToEdit.addEventListener("click", () => {
+    doneOverlay.style.display = "none";
+    setLocked(false);
+  });
+
+  function clearForNext(){
+    nameInput.value = "";
+    numInput.value = "";
+    // fontSelect.selectedIndex = 0; // 必要なら戻す
+    updatePreview();
+
+    // 扉を閉じる
+    staffControls.style.display = "none";
+    staffGate.style.display = "none";
+    staffPass.value = "";
+    staffMsg.textContent = "";
+
+    setLocked(false);
+    setTicket(getNextTicket()); // 新番号
+    doneOverlay.style.display = "none";
+  }
+
+  nextPerson.addEventListener("click", clearForNext);
+
+  // ===== スタッフ扉（オーバーレイ内）=====
+  openStaffInOverlay.addEventListener("click", () => {
+    staffGate.style.display = (staffGate.style.display === "none") ? "block" : "none";
+  });
+
+  const STAFF_PASSWORD = "miraikan"; // 合言葉（変更OK）
+  unlockStaff.addEventListener("click", () => {
+    if ((staffPass.value || "").trim() === STAFF_PASSWORD) {
+      staffControls.style.display = "block";
+      staffMsg.textContent = "✅ スタッフ操作を表示しました";
+      staffMsg.style.color = "#0a7";
+    } else {
+      staffControls.style.display = "none";
+      staffMsg.textContent = "❌ 合言葉が違います";
+      staffMsg.style.color = "#c33";
+    }
+  });
+
+  // ===== リセット（この端末・この日付・このdeviceのみ）=====
+  resetCounterBtn.addEventListener("click", () => {
+    const ok = confirm(`この端末（${devicePrefix}）の受付番号を0にリセットします。\nよろしいですか？`);
+    if (!ok) return;
+    localStorage.setItem(counterKey(), "0");
+    setTicket(getNextTicket());
+    alert(`リセットしました。\n新しい受付番号：${ticketInput.value}`);
+    doneSummary.innerHTML = makeSummary();
+  });
+
+  // ===== 出力/保存（ここは次ステップで実装）=====
+  // いまはUIだけ。次に「パス化」「SVGダウンロード」「Drive保存(GAS)」をここに入れます。
+  btnDownload.addEventListener("click", () => alert("次ステップ：パス化SVGダウンロードを実装します"));
+  btnDrive.addEventListener("click", () => alert("次ステップ：Drive保存(GAS)を実装します"));
+
+})();
 </script>
 
 </body>
