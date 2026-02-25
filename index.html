@@ -198,7 +198,7 @@
   const apiKey      = document.getElementById("apiKeyOverlay");
   const resetCounterBtn = document.getElementById("resetCounterOverlay");
 
-  // ===== localStorage 安全化（ここが今回の“止まる”対策）=====
+  // ===== localStorage 安全化 =====
   function safeStorage() {
     try {
       const k = "__hk_test__";
@@ -350,8 +350,8 @@
 
   function clearForNext() {
     // スタッフが押す前提（解錠してるはず）
-    nameInput.value = "";
-    numInput.value = "";
+    nameInput.value = "はこだてみらい館";
+    numInput.value = "1015";
     updatePreview();
 
     setLocked(false);
