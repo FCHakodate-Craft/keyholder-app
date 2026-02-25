@@ -160,7 +160,7 @@
       </button>
       <button id="nextPerson" type="button"
   　　　style="flex:1;background:#0a7;border:none;color:#fff;border-radius:10px;padding:10px;cursor:pointer; display:none;">
- 　　　 次の人へ
+  　　　次の人へ
 　　　</button>
     </div>
   </div>
@@ -170,74 +170,97 @@
 (() => {
   // ===== DOM =====
   const ticketInput = document.getElementById("ticketInput");
-  const nameInput = document.getElementById("nameInput");
-  const numInput = document.getElementById("numInput");
-  const fontSelect = document.getElementById("fontSelect");
-  const mainText = document.getElementById("mainText");
-  const numText = document.getElementById("numText");
+  const nameInput   = document.getElementById("nameInput");
+  const numInput    = document.getElementById("numInput");
+  const fontSelect  = document.getElementById("fontSelect");
+  const mainText    = document.getElementById("mainText");
+  const numText     = document.getElementById("numText");
 
   const btnDone = document.getElementById("btnDone");
   const btnEdit = document.getElementById("btnEdit");
 
   const doneOverlay = document.getElementById("doneOverlay");
   const doneSummary = document.getElementById("doneSummary");
-  const closeDone = document.getElementById("closeDone");
-  const backToEdit = document.getElementById("backToEdit");
-  const nextPerson = document.getElementById("nextPerson");
+  const closeDone   = document.getElementById("closeDone");
+  const backToEdit  = document.getElementById("backToEdit");
+  const nextPerson  = document.getElementById("nextPerson");
 
   const openStaffInOverlay = document.getElementById("openStaffInOverlay");
-  const staffGate = document.getElementById("staffGate");
-
-  const staffPass = document.getElementById("staffPassOverlay");
-  const unlockStaff = document.getElementById("unlockStaffOverlay");
-  const staffMsg = document.getElementById("staffMsgOverlay");
+  const staffGate     = document.getElementById("staffGate");
+  const staffPass     = document.getElementById("staffPassOverlay");
+  const unlockStaff   = document.getElementById("unlockStaffOverlay");
+  const staffMsg      = document.getElementById("staffMsgOverlay");
   const staffControls = document.getElementById("staffControlsOverlay");
 
   const btnDownload = document.getElementById("btnDownloadOverlay");
-  const btnDrive = document.getElementById("btnDriveOverlay");
-  const gasUrl = document.getElementById("gasUrlOverlay");
-  const apiKey = document.getElementById("apiKeyOverlay");
+  const btnDrive    = document.getElementById("btnDriveOverlay");
+  const gasUrl      = document.getElementById("gasUrlOverlay");
+  const apiKey      = document.getElementById("apiKeyOverlay");
   const resetCounterBtn = document.getElementById("resetCounterOverlay");
+
+  // ===== localStorage 安全化（ここが今回の“止まる”対策）=====
+  function safeStorage() {
+    try {
+      const k = "__hk_test__";
+      localStorage.setItem(k, "1");
+      localStorage.removeItem(k);
+      return localStorage;
+    } catch (e) {
+      // localStorageが使えない環境でも動かす
+      return {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+      };
+    }
+  }
+  const store = safeStorage();
 
   // ===== 受付番号（端末ID + 日付タグ + 連番）=====
   const params = new URLSearchParams(location.search);
   const devicePrefix = (params.get("device") || "X").toUpperCase();
 
-  function getEventTag(){
-    const d = new Date();
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const dd = String(d.getDate()).padStart(2,"0");
-    return `${mm}${dd}`; // 0328
+  function getEventTag() {
+    const d  = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${mm}${dd}`; // 例: 0328
   }
-  function pad3(n){ return String(n).padStart(3,"0"); }
-  function counterKey(){
-    return `hk_ticket_counter_v2_${getEventTag()}_${devicePrefix}`;
-  }
-  function getNextTicket(){
+  function pad3(n){ return String(n).padStart(3, "0"); }
+  function counterKey(){ return `hk_ticket_counter_v2_${getEventTag()}_${devicePrefix}`; }
+
+  function getNextTicket() {
     const key = counterKey();
-    const current = parseInt(localStorage.getItem(key) || "0", 10);
+    const current = parseInt(store.getItem(key) || "0", 10);
     const next = current + 1;
-    localStorage.setItem(key, String(next));
+    store.setItem(key, String(next));
     return next;
   }
-  function setTicket(n){
+
+  function setTicket(n) {
     const value = `${getEventTag()}-${devicePrefix}-${pad3(n)}`;
-    ticketInput.value = value;
+    if (ticketInput) ticketInput.value = value;
     return value;
   }
 
-  // 初期番号
-  setTicket(getNextTicket());
+  // 初期番号（storageが死んでても最低限は表示させる）
+  try {
+    setTicket(getNextTicket());
+  } catch (e) {
+    // 念のための保険（ここに来たら本当に特殊）
+    const fallback = `${getEventTag()}-${devicePrefix}-001`;
+    if (ticketInput) ticketInput.value = fallback;
+  }
 
   // ===== プレビュー更新 =====
-  function normalizeNumber(){
-    const clean = (numInput.value || "").replace(/[^0-9]/g,"").slice(0,4);
+  function normalizeNumber() {
+    const clean = (numInput.value || "").replace(/[^0-9]/g, "").slice(0, 4);
     numInput.value = clean;
     return clean;
   }
 
-  function fitMainText(){
-    const holeCenter = 3.8, holeRadius = 1.5;
+  function fitMainText() {
+    const holeCenter = 3.8, holeRadius = 1.5; // 穴径3mm
     const holeMargin = 0.8;
     const numberArea = 6;
     const rightMargin = 2;
@@ -247,7 +270,7 @@
     const textEnd = 70 - numberArea - rightMargin;
 
     const maxWidth = Math.max(5, textEnd - textStart);
-    const centerX = textStart + maxWidth/2;
+    const centerX = textStart + maxWidth / 2;
 
     mainText.setAttribute("x", centerX);
 
@@ -264,9 +287,9 @@
     });
   }
 
-  function updatePreview(){
+  function updatePreview() {
     mainText.textContent = nameInput.value || "";
-    numText.textContent = normalizeNumber();
+    numText.textContent  = normalizeNumber();
     const f = fontSelect.value;
     mainText.setAttribute("font-family", f);
     numText.setAttribute("font-family", f);
@@ -279,7 +302,7 @@
   updatePreview();
 
   // ===== 完了フロー =====
-  function setLocked(locked){
+  function setLocked(locked) {
     nameInput.readOnly = locked;
     numInput.readOnly = locked;
     fontSelect.disabled = locked;
@@ -287,93 +310,89 @@
     btnEdit.style.display = locked ? "block" : "none";
   }
 
-  function makeSummary(){
+  function makeSummary() {
     const name = (nameInput.value || "").trim() || "（未入力）";
-    const num = (numInput.value || "").trim() || "（なし）";
+    const num  = (numInput.value || "").trim() || "（なし）";
     const fontLabel = fontSelect.options[fontSelect.selectedIndex]?.textContent || "";
     const ticket = ticketInput.value || "";
     return `受付番号：${ticket}<br>文字：${name}<br>数字：${num}<br>フォント：${fontLabel}`;
+  }
+
+  function resetStaffUI() {
+    staffControls.style.display = "none";
+    staffGate.style.display = "none";
+    staffPass.value = "";
+    staffMsg.textContent = "";
+    // 「次の人へ」は解錠後のみ見せる
+    nextPerson.style.display = "none";
   }
 
   btnDone.addEventListener("click", () => {
     updatePreview();
     setLocked(true);
     doneSummary.innerHTML = makeSummary();
+    resetStaffUI();                 // 表示のたびにスタッフ状態は初期化
     doneOverlay.style.display = "flex";
   });
 
   btnEdit.addEventListener("click", () => setLocked(false));
 
   closeDone.addEventListener("click", () => {
-  doneOverlay.style.display = "none";
-
-  // スタッフ状態リセット
-  staffControls.style.display = "none";
-  staffGate.style.display = "none";
-  staffPass.value = "";
-  staffMsg.textContent = "";
-  nextPerson.style.display = "none";
-
-  backToEdit.addEventListener("click", () => {
-  doneOverlay.style.display = "none";
-  setLocked(false);
-
-  staffControls.style.display = "none";
-  staffGate.style.display = "none";
-  staffPass.value = "";
-  staffMsg.textContent = "";
-  nextPerson.style.display = "none";
+    doneOverlay.style.display = "none";
+    resetStaffUI();                 // 閉じたら必ず合言葉やり直し
   });
 
-  function clearForNext(){
+  backToEdit.addEventListener("click", () => {
+    doneOverlay.style.display = "none";
+    setLocked(false);
+    resetStaffUI();                 // 修正でも必ず合言葉やり直し
+  });
+
+  function clearForNext() {
+    // スタッフが押す前提（解錠してるはず）
     nameInput.value = "";
     numInput.value = "";
-    // fontSelect.selectedIndex = 0; // 必要なら戻す
     updatePreview();
 
-    // 扉を閉じる
-    staffControls.style.display = "none";
-    staffGate.style.display = "none";
-    staffPass.value = "";
-    staffMsg.textContent = "";
-
     setLocked(false);
-    setTicket(getNextTicket()); // 新番号
+    setTicket(getNextTicket());     // 新番号
     doneOverlay.style.display = "none";
+    resetStaffUI();
   }
 
   nextPerson.addEventListener("click", clearForNext);
 
-  // ===== スタッフ扉（オーバーレイ内）=====
+  // ===== スタッフ扉 =====
   openStaffInOverlay.addEventListener("click", () => {
     staffGate.style.display = (staffGate.style.display === "none") ? "block" : "none";
   });
 
-  const STAFF_PASSWORD = "miraikan"; // 合言葉（変更OK）
+  const STAFF_PASSWORD = "miraikan";
   unlockStaff.addEventListener("click", () => {
     if ((staffPass.value || "").trim() === STAFF_PASSWORD) {
       staffControls.style.display = "block";
       staffMsg.textContent = "✅ スタッフ操作を表示しました";
       staffMsg.style.color = "#0a7";
+      nextPerson.style.display = "block";  // ←解錠後のみ表示
     } else {
       staffControls.style.display = "none";
       staffMsg.textContent = "❌ 合言葉が違います";
       staffMsg.style.color = "#c33";
+      nextPerson.style.display = "none";
     }
   });
 
-  // ===== リセット（この端末・この日付・このdeviceのみ）=====
+  // ===== カウンターリセット =====
   resetCounterBtn.addEventListener("click", () => {
     const ok = confirm(`この端末（${devicePrefix}）の受付番号を0にリセットします。\nよろしいですか？`);
     if (!ok) return;
-    localStorage.setItem(counterKey(), "0");
+    store.setItem(counterKey(), "0");
     setTicket(getNextTicket());
     alert(`リセットしました。\n新しい受付番号：${ticketInput.value}`);
     doneSummary.innerHTML = makeSummary();
   });
 
-  // ===== 出力/保存（ここは次ステップで実装）=====
-  // いまはUIだけ。次に「パス化」「SVGダウンロード」「Drive保存(GAS)」をここに入れます。
+  // ===== 出力/保存（次ステップ） =====
   btnDownload.addEventListener("click", () => alert("次ステップ：パス化SVGダウンロードを実装します"));
   btnDrive.addEventListener("click", () => alert("次ステップ：Drive保存(GAS)を実装します"));
 
