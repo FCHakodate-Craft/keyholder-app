@@ -49,6 +49,36 @@
   src: url("fonts_otf/MPLUS1p-Regular.ttf") format("truetype");
   font-display: swap;
 }
+@font-face{
+  font-family: "F5_DelaGothicOne";
+  src: url("fonts_otf/DelaGothicOne-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F6_DotGothic16";
+  src: url("fonts_otf/DotGothic16-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F7_HachiMaruPop";
+  src: url("fonts_otf/HachiMaruPop-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F8_KaiseiDecol";
+  src: url("fonts_otf/KaiseiDecol-Bold.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F9_RocknRollOne";
+  src: url("fonts_otf/RocknRollOne-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F10_WDXLLubrifontJPN";
+  src: url("fonts_otf/WDXLLubrifontJPN-Regular.ttf") format("truetype");
+  font-display: swap;
+}
   
 </style>
 </head>
@@ -93,10 +123,16 @@
 
     <label>フォント</label>
     <select id="fontSelect">
-  　　<option value="F1_NotoSansJP">Noto Sans JP</option>
+ 　　 <option value="F1_NotoSansJP">Noto Sans JP</option>
   　　<option value="F2_NotoSerifJP">Noto Serif JP</option>
-  　　<option value="F3_ZenMaruGothic">Zen Maru Gothic</option>
-  　　<option value="F4_MPLUS1p">M PLUS 1p</option>
+ 　　 <option value="F3_ZenMaruGothic">Zen Maru Gothic</option>
+ 　　 <option value="F4_MPLUS1p">M PLUS 1p</option>
+ 　　 <option value="F5_DelaGothicOne">Dela Gothic One</option>
+ 　　 <option value="F6_DotGothic16">Dot Gothic 16</option>
+  　　<option value="F7_HachiMaruPop">Hachi Maru Pop</option>
+  　　<option value="F8_KaiseiDecol">Kaisei Decol (Bold)</option>
+ 　　 <option value="F9_RocknRollOne">RocknRoll One</option>
+ 　　 <option value="F10_WDXLLubrifontJPN">WDXL Lubrifont JPN</option>
 　　</select>
 
     <div class="btnRow">
@@ -224,11 +260,18 @@
   const resetCounterBtn = document.getElementById("resetCounterOverlay");
 
     // ===== フォント（パス化用：ttf/otf）=====
-  const FONT_TABLE = {
+const FONT_TABLE = {
   "F1_NotoSansJP":    { pathUrl:"fonts_otf/NotoSansJP-Regular.ttf",    previewFamily:"F1_NotoSansJP" },
   "F2_NotoSerifJP":   { pathUrl:"fonts_otf/NotoSerifJP-Regular.ttf",   previewFamily:"F2_NotoSerifJP" },
   "F3_ZenMaruGothic": { pathUrl:"fonts_otf/ZenMaruGothic-Regular.ttf", previewFamily:"F3_ZenMaruGothic" },
   "F4_MPLUS1p":       { pathUrl:"fonts_otf/MPLUS1p-Regular.ttf",       previewFamily:"F4_MPLUS1p" },
+
+  "F5_DelaGothicOne":     { pathUrl:"fonts_otf/DelaGothicOne-Regular.ttf",     previewFamily:"F5_DelaGothicOne" },
+  "F6_DotGothic16":       { pathUrl:"fonts_otf/DotGothic16-Regular.ttf",       previewFamily:"F6_DotGothic16" },
+  "F7_HachiMaruPop":      { pathUrl:"fonts_otf/HachiMaruPop-Regular.ttf",      previewFamily:"F7_HachiMaruPop" },
+  "F8_KaiseiDecol":       { pathUrl:"fonts_otf/KaiseiDecol-Bold.ttf",          previewFamily:"F8_KaiseiDecol" },
+  "F9_RocknRollOne":      { pathUrl:"fonts_otf/RocknRollOne-Regular.ttf",      previewFamily:"F9_RocknRollOne" },
+  "F10_WDXLLubrifontJPN":  { pathUrl:"fonts_otf/WDXLLubrifontJPN-Regular.ttf",  previewFamily:"F10_WDXLLubrifontJPN" }
 };
 
   const fontCache = new Map();
