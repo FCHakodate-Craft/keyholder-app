@@ -28,6 +28,28 @@
   .btn2 { background:#fff; color:#000; border:1px solid #000; cursor:pointer; }
   .btnNext { background:#0a7; color:#fff; border:none; cursor:pointer; }
   .hint { font-size:12px; color:#666; margin-top:10px; line-height:1.6; }
+
+@font-face{
+  font-family: "F1_NotoSansJP";
+  src: url("fonts_otf/NotoSansJP-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F2_NotoSerifJP";
+  src: url("fonts_otf/NotoSerifJP-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F3_ZenMaruGothic";
+  src: url("fonts_otf/ZenMaruGothic-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face{
+  font-family: "F4_MPLUS1p";
+  src: url("fonts_otf/MPLUS1p-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+  
 </style>
 </head>
 
@@ -203,11 +225,11 @@
 
     // ===== フォント（パス化用：ttf/otf）=====
   const FONT_TABLE = {
-    "F1_NotoSansJP":      { pathUrl: "fonts_otf/NotoSansJP-Regular.ttf",      previewFamily: '"Noto Sans JP", sans-serif' },
-    "F2_NotoSerifJP":     { pathUrl: "fonts_otf/NotoSerifJP-Regular.ttf",     previewFamily: '"Noto Serif JP", serif' },
-    "F3_ZenMaruGothic":   { pathUrl: "fonts_otf/ZenMaruGothic-Regular.ttf",   previewFamily: '"Zen Maru Gothic", sans-serif' },
-    "F4_MPLUS1p":         { pathUrl: "fonts_otf/MPLUS1p-Regular.ttf",         previewFamily: '"M PLUS 1p", sans-serif' },
-  };
+  "F1_NotoSansJP":    { pathUrl:"fonts_otf/NotoSansJP-Regular.ttf",    previewFamily:"F1_NotoSansJP" },
+  "F2_NotoSerifJP":   { pathUrl:"fonts_otf/NotoSerifJP-Regular.ttf",   previewFamily:"F2_NotoSerifJP" },
+  "F3_ZenMaruGothic": { pathUrl:"fonts_otf/ZenMaruGothic-Regular.ttf", previewFamily:"F3_ZenMaruGothic" },
+  "F4_MPLUS1p":       { pathUrl:"fonts_otf/MPLUS1p-Regular.ttf",       previewFamily:"F4_MPLUS1p" },
+};
 
   const fontCache = new Map();
   async function getPathFont(fontKey){
