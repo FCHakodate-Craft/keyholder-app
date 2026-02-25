@@ -10,6 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#000000">
 
+  <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+
 <style>
   body { font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif; margin: 30px; }
   h2 { margin-bottom: 20px; white-space: pre-line; }
@@ -69,10 +71,11 @@
 
     <label>フォント</label>
     <select id="fontSelect">
-      <option value="sans-serif">Sans</option>
-      <option value="serif">Serif</option>
-      <option value="monospace">Monospace</option>
-    </select>
+  　　<option value="F1_NotoSansJP">Noto Sans JP</option>
+  　　<option value="F2_NotoSerifJP">Noto Serif JP</option>
+  　　<option value="F3_ZenMaruGothic">Zen Maru Gothic</option>
+  　　<option value="F4_MPLUS1p">M PLUS 1p</option>
+　　</select>
 
     <div class="btnRow">
       <button class="btn" id="btnDone" type="button">完了（スタッフに渡す）</button>
@@ -198,6 +201,29 @@
   const apiKey      = document.getElementById("apiKeyOverlay");
   const resetCounterBtn = document.getElementById("resetCounterOverlay");
 
+    // ===== フォント（パス化用：ttf/otf）=====
+  const FONT_TABLE = {
+    "F1_NotoSansJP":      { pathUrl: "fonts_otf/NotoSansJP-Regular.ttf",      previewFamily: '"Noto Sans JP", sans-serif' },
+    "F2_NotoSerifJP":     { pathUrl: "fonts_otf/NotoSerifJP-Regular.ttf",     previewFamily: '"Noto Serif JP", serif' },
+    "F3_ZenMaruGothic":   { pathUrl: "fonts_otf/ZenMaruGothic-Regular.ttf",   previewFamily: '"Zen Maru Gothic", sans-serif' },
+    "F4_MPLUS1p":         { pathUrl: "fonts_otf/MPLUS1p-Regular.ttf",         previewFamily: '"M PLUS 1p", sans-serif' },
+  };
+
+  const fontCache = new Map();
+  async function getPathFont(fontKey){
+    if (fontCache.has(fontKey)) return fontCache.get(fontKey);
+    const info = FONT_TABLE[fontKey];
+    if (!info) throw new Error("フォント未定義: " + fontKey);
+
+    const res = await fetch(info.pathUrl);
+    if (!res.ok) throw new Error("フォント読み込み失敗: " + info.pathUrl);
+
+    const buf = await res.arrayBuffer();
+    const font = opentype.parse(buf);
+    fontCache.set(fontKey, font);
+    return font;
+  }
+
   // ===== localStorage 安全化 =====
   function safeStorage() {
     try {
@@ -243,11 +269,11 @@
     return value;
   }
 
-  // 初期番号（storageが死んでても最低限は表示させる）
+  // 初期番号
   try {
     setTicket(getNextTicket());
   } catch (e) {
-    // 念のための保険（ここに来たら本当に特殊）
+    // 念のための保険
     const fallback = `${getEventTag()}-${devicePrefix}-001`;
     if (ticketInput) ticketInput.value = fallback;
   }
@@ -291,8 +317,9 @@
     mainText.textContent = nameInput.value || "";
     numText.textContent  = normalizeNumber();
     const f = fontSelect.value;
-    mainText.setAttribute("font-family", f);
-    numText.setAttribute("font-family", f);
+    const fam = (FONT_TABLE[f]?.previewFamily) || "sans-serif";
+    mainText.setAttribute("font-family", fam);
+    numText.setAttribute("font-family", fam);
     fitMainText();
   }
 
@@ -327,6 +354,111 @@
     nextPerson.style.display = "none";
   }
 
+  function escapeXml(s){
+    return (s || "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+  }
+
+  function makeFilename(){
+    const d = new Date();
+    const pad = n => String(n).padStart(2,"0");
+    const stamp = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+    const ticket = (ticketInput.value || "X-000").replace(/[\\/:*?"<>|]/g,"");
+    const name = (nameInput.value || "NONAME").replace(/[\\/:*?"<>|]/g,"").slice(0,20);
+    const num = (numInput.value || "").slice(0,4);
+    return `${stamp}_${ticket}_${name}_${num}.svg`;
+  }
+
+  function makeSvgShell(inner){
+    // レーザー用：パスは fill #000（K100相当運用）
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="70mm" height="15mm" viewBox="0 0 70 15">
+  <rect x="0.8" y="0.8" width="68.4" height="13.4" rx="2.2" ry="2.2" fill="none" stroke="#000" stroke-width="0.2"/>
+  <circle cx="3.8" cy="7.5" r="1.5" fill="none" stroke="#000" stroke-width="0.2"/>
+  ${inner}
+</svg>`;
+  }
+
+  async function buildOutlinedSvg(){
+    const fontKey = fontSelect.value;
+    const font = await getPathFont(fontKey);
+
+    const name = (nameInput.value || "");
+    const num  = (numInput.value || "").replace(/[^0-9]/g,"").slice(0,4);
+
+    // いまのプレビューで確定した値（自動縮小後）を使う
+    const mainX = parseFloat(mainText.getAttribute("x")) || 34;
+    const mainY = 8;
+    const mainSize = parseFloat(mainText.getAttribute("font-size")) || 6;
+
+    // メイン文字パス
+    const pMain = font.getPath(name, 0, 0, mainSize);
+    const bMain = pMain.getBoundingBox();
+    const wMain = bMain.x2 - bMain.x1;
+    const hMain = bMain.y2 - bMain.y1;
+
+    // 見た目中央合わせ（フォント差を吸収するため少し補正）
+    const mainTx = mainX - (bMain.x1 + wMain/2);
+    const mainTy = (mainY + mainSize*0.35) - (bMain.y1 + hMain/2);
+    const dMain = pMain.toPathData(3);
+
+    // 数字（回転中心）
+    const numCX = 64;
+    const numCY = 7.5;
+    const numSize = 4;
+
+    const pNum = font.getPath(num, 0, 0, numSize);
+    const bNum = pNum.getBoundingBox();
+    const wNum = bNum.x2 - bNum.x1;
+    const hNum = bNum.y2 - bNum.y1;
+
+    const numTx = numCX - (bNum.x1 + wNum/2);
+    const numTy = (numCY + numSize*0.35) - (bNum.y1 + hNum/2);
+    const dNum = pNum.toPathData(3);
+
+    const inner = `
+  <path d="${escapeXml(dMain)}" fill="#000" transform="translate(${mainTx.toFixed(3)} ${mainTy.toFixed(3)})"/>
+  <path d="${escapeXml(dNum)}" fill="#000" transform="translate(${numTx.toFixed(3)} ${numTy.toFixed(3)}) rotate(-90 ${numCX} ${numCY})"/>`;
+
+    return makeSvgShell(inner);
+  }
+
+    function postToGAS(gasUrlValue, payloadObj){
+    return new Promise((resolve, reject) => {
+      if (!gasUrlValue) return reject(new Error("GAS URLが未入力です"));
+
+      const iframeName = "hk_gas_iframe_" + Date.now();
+      const iframe = document.createElement("iframe");
+      iframe.name = iframeName;
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = gasUrlValue;
+      form.target = iframeName;
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "payload";
+      input.value = JSON.stringify(payloadObj);
+
+      form.appendChild(input);
+      document.body.appendChild(form);
+
+      // 送信
+      form.submit();
+
+      // 成功/失敗はレスポンスを読めないので、一定時間後に成功扱い（運用向け）
+      setTimeout(() => {
+        form.remove();
+        iframe.remove();
+        resolve({ ok:true });
+      }, 1200);
+    });
+  }
+  
   btnDone.addEventListener("click", () => {
     updatePreview();
     setLocked(true);
@@ -393,8 +525,55 @@
   });
 
   // ===== 出力/保存（次ステップ） =====
-  btnDownload.addEventListener("click", () => alert("次ステップ：パス化SVGダウンロードを実装します"));
-  btnDrive.addEventListener("click", () => alert("次ステップ：Drive保存(GAS)を実装します"));
+  function downloadText(filename, text){
+    const blob = new Blob([text], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  btnDownload.addEventListener("click", async () => {
+    try {
+      staffMsg.textContent = "⏳ SVG生成中…";
+      staffMsg.style.color = "#666";
+      const svg = await buildOutlinedSvg();
+      downloadText(makeFilename(), svg);
+      staffMsg.textContent = "✅ ダウンロードしました";
+      staffMsg.style.color = "#0a7";
+    } catch(e){
+      staffMsg.textContent = "❌ " + (e.message || String(e));
+      staffMsg.style.color = "#c33";
+    }
+  });
+
+  btnDrive.addEventListener("click", async () => {
+    try {
+      const url = (gasUrl.value || "").trim();
+      staffMsg.textContent = "⏳ Driveへ送信中…";
+      staffMsg.style.color = "#666";
+
+      const svg = await buildOutlinedSvg();
+      const payload = {
+        apiKey: (apiKey.value || "").trim(),
+        filename: makeFilename(),
+        ticket: ticketInput.value || "",
+        svg
+      };
+
+      await postToGAS(url, payload);
+
+      staffMsg.textContent = "✅ Driveへ送信しました（保存完了まで数秒かかることがあります）";
+      staffMsg.style.color = "#0a7";
+    } catch(e){
+      staffMsg.textContent = "❌ " + (e.message || String(e));
+      staffMsg.style.color = "#c33";
+    }
+  });
 
 })();
 </script>
