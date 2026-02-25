@@ -159,9 +159,9 @@
         修正する
       </button>
       <button id="nextPerson" type="button"
-        style="flex:1;background:#0a7;border:none;color:#fff;border-radius:10px;padding:10px;cursor:pointer;">
-        次の人へ
-      </button>
+  　　　style="flex:1;background:#0a7;border:none;color:#fff;border-radius:10px;padding:10px;cursor:pointer; display:none;">
+ 　　　 次の人へ
+　　　</button>
     </div>
   </div>
 </div>
@@ -304,11 +304,25 @@
 
   btnEdit.addEventListener("click", () => setLocked(false));
 
-  closeDone.addEventListener("click", () => { doneOverlay.style.display = "none"; });
+  closeDone.addEventListener("click", () => {
+  doneOverlay.style.display = "none";
+
+  // スタッフ状態リセット
+  staffControls.style.display = "none";
+  staffGate.style.display = "none";
+  staffPass.value = "";
+  staffMsg.textContent = "";
+  nextPerson.style.display = "none";
 
   backToEdit.addEventListener("click", () => {
-    doneOverlay.style.display = "none";
-    setLocked(false);
+  doneOverlay.style.display = "none";
+  setLocked(false);
+
+  staffControls.style.display = "none";
+  staffGate.style.display = "none";
+  staffPass.value = "";
+  staffMsg.textContent = "";
+  nextPerson.style.display = "none";
   });
 
   function clearForNext(){
